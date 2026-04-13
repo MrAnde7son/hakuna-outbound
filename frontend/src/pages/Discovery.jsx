@@ -11,6 +11,7 @@ export default function Discovery() {
     company_size: '201-500',
     industry: 'fintech',
     tech_stack: 'Tenable, AWS',
+    locations: 'United States',
     min_score: 70,
   })
   const [results, setResults] = useState([])
@@ -20,6 +21,7 @@ export default function Discovery() {
       const payload = {
         ...form,
         titles: form.titles.split(',').map((s) => s.trim()).filter(Boolean),
+        locations: form.locations.split(',').map((s) => s.trim()).filter(Boolean),
       }
       const { data } = await api.post('/api/discovery/run', payload)
       return data.prospects
@@ -68,6 +70,9 @@ export default function Discovery() {
             </Field>
             <Field label="Tech stack (comma-separated)">
               <input value={form.tech_stack} onChange={(e) => setForm({ ...form, tech_stack: e.target.value })} className={inputCls} />
+            </Field>
+            <Field label="Locations (comma-separated)">
+              <input value={form.locations} onChange={(e) => setForm({ ...form, locations: e.target.value })} className={inputCls} placeholder="United States, London" />
             </Field>
           </div>
           <Field label={`Minimum ICP score — ${form.min_score}`}>
