@@ -36,25 +36,25 @@ export default function Prospects() {
   const count = selectedProspectIds.size
 
   return (
-    <div className="p-8 space-y-6 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto pb-24 sm:pb-6">
       <div>
-        <h1 className="font-display text-3xl font-bold text-ink">Prospects</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink">Prospects</h1>
         <p className="text-muted text-sm mt-1">Your working list. Select and enroll into Lemlist sequences.</p>
       </div>
 
       <ProspectTable rows={prospects} selectable />
 
       {count > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-surface border border-border-strong rounded-full px-6 py-3 flex items-center gap-4 shadow-pop z-40">
-          <span className="text-sm text-ink"><span className="text-accent-green font-bold">{count}</span> selected</span>
-          <button onClick={() => setModalOpen(true)} className="text-xs px-4 py-1.5 bg-accent-green text-white font-medium rounded-md hover:bg-emerald-600 transition shadow-sm">Enroll in Lemlist</button>
+        <div className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 bg-surface border border-border-strong rounded-full px-4 sm:px-6 py-3 flex items-center justify-center gap-3 sm:gap-4 shadow-pop z-40">
+          <span className="text-sm text-ink whitespace-nowrap"><span className="text-accent-green font-bold">{count}</span> selected</span>
+          <button onClick={() => setModalOpen(true)} className="text-xs px-4 py-1.5 bg-accent-green text-white font-medium rounded-md hover:bg-emerald-600 transition shadow-sm whitespace-nowrap">Enroll<span className="hidden sm:inline"> in Lemlist</span></button>
           <button onClick={clearSelection} className="text-xs text-muted hover:text-ink transition">Clear</button>
         </div>
       )}
 
       {modalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setModalOpen(false)}>
-          <div className="bg-surface border border-border rounded-xl p-6 w-[480px] shadow-pop" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setModalOpen(false)}>
+          <div className="bg-surface border border-border rounded-xl p-5 sm:p-6 w-full max-w-[480px] shadow-pop" onClick={(e) => e.stopPropagation()}>
             <div className="font-display text-xl font-semibold text-ink">Pick a campaign</div>
             <div className="text-xs text-muted mt-1">Enrolling {count} prospect{count !== 1 ? 's' : ''}.</div>
             <div className="mt-5 space-y-2 max-h-[400px] overflow-auto">

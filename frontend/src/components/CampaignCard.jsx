@@ -10,16 +10,16 @@ export default function CampaignCard({ campaign, onPause, onResume, onLaunch }) 
   return (
     <div className="bg-surface border border-border rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-border-strong transition-all">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="font-display text-lg font-semibold text-ink">{campaign.name}</div>
-          <div className="text-xs text-muted mt-1 font-mono">ID · {campaign.id}</div>
+        <div className="min-w-0">
+          <div className="font-display text-lg font-semibold text-ink truncate">{campaign.name}</div>
+          <div className="text-xs text-muted mt-1 font-mono truncate">ID · {campaign.id}</div>
         </div>
-        <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-1 border rounded-md ${STATUS_STYLE[campaign.status] || STATUS_STYLE.draft}`}>
+        <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-1 border rounded-md shrink-0 ${STATUS_STYLE[campaign.status] || STATUS_STYLE.draft}`}>
           {campaign.status}
         </span>
       </div>
 
-      <div className="grid grid-cols-4 gap-3 mt-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
         <Metric label="Sent" value={s.sent ?? 0} />
         <Metric label="Open" value={`${(s.openRate ?? 0).toFixed ? s.openRate.toFixed(1) : s.openRate}%`} tone="blue" />
         <Metric label="Reply" value={`${(s.replyRate ?? 0).toFixed ? s.replyRate.toFixed(1) : s.replyRate}%`} tone="green" />
@@ -35,7 +35,7 @@ export default function CampaignCard({ campaign, onPause, onResume, onLaunch }) 
         </div>
       </div>
 
-      <div className="flex gap-2 mt-5">
+      <div className="flex flex-wrap gap-2 mt-5">
         {campaign.status === 'active' && (
           <button onClick={() => onPause?.(campaign)} className="text-xs font-medium px-3 py-2 border border-border rounded-md hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 transition">Pause</button>
         )}

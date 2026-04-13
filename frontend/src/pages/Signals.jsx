@@ -10,15 +10,15 @@ export default function Signals() {
   })
 
   return (
-    <div className="p-8 space-y-6 max-w-[1400px] mx-auto">
-      <div className="flex items-end justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto">
+      <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold text-ink">Signals</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink">Signals</h1>
           <p className="text-muted text-sm mt-1">Live engagement across every Lemlist sequence.</p>
         </div>
-        <div className="text-xs text-muted flex items-center gap-2 font-mono">
+        <div className="text-xs text-muted flex items-center gap-2 font-mono shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
-          Auto-refresh · 30s
+          <span className="hidden sm:inline">Auto-refresh · </span>30s
         </div>
       </div>
       <SignalFeed signals={signals} onRespond={(s) => alert(`Open draft reply to ${s.prospect}`)} />
