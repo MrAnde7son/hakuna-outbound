@@ -8,6 +8,9 @@ frontend/dist/
 frontend/.env
 .DS_Store
 
+# google-github-actions/auth credentials file
+gha-creds-*.json
+
 # Terraform
 terraform/.terraform/
 terraform/.terraform.lock.hcl
