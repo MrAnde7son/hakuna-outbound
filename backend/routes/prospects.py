@@ -53,8 +53,19 @@ async def enroll(req: EnrollRequest, session: Session = Depends(get_session)):
         if not p or not p.email:
             results.append({"id": pid, "ok": False, "error": "missing prospect or email"})
             continue
+        custom = {
+            "jobTitle": p.title,
+            "industry": p.industry,
+            "companySize": p.company_size,
+            "techStack": p.tech_stack,
+            "location": p.location,
+            "linkedinUrl": p.linkedin_url,
+            "icpScore": p.icp_score,
+            "icpReason": p.score_reason,
+        }
         r = await enroll_lead(
             req.campaign_id, p.email, p.first_name, p.last_name, p.company,
+            custom=custom,
         )
         if r.get("ok"):
             p.status = "enrolled"

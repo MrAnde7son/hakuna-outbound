@@ -7,8 +7,10 @@ services:
       - ./backend/.env
     environment:
       - DB_PATH=/app/data/hakuna.db
+      - GOOGLE_APPLICATION_CREDENTIALS=/gcp/adc.json
     volumes:
       - hakuna-db:/app/data
+      - ${HOME}/.config/gcloud/application_default_credentials.json:/gcp/adc.json:ro
     restart: unless-stopped
 
   frontend:

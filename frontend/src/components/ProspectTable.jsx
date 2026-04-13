@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import ScoreBar from './ScoreBar.jsx'
 import { useAppStore } from '../store/useAppStore.js'
 
@@ -10,13 +11,39 @@ const STATUS_STYLE = {
 }
 
 export default function ProspectTable({ rows, selectable = false, compact = false }) {
-  const { selectedProspectIds, toggleSelect } = useAppStore()
+  const { selectedProspectIds, toggleSelect, selectAll, clearSelection } = useAppStore()
+  const headerRef = useRef(null)
+  const visibleIds = rows.map((p) => p.id ?? p.apollo_id)
+  const selectedVisibleCount = visibleIds.filter((id) => selectedProspectIds.has(id)).length
+  const allSelected = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length
+  const someSelected = selectedVisibleCount > 0 && !allSelected
+
+  useEffect(() => {
+    if (headerRef.current) headerRef.current.indeterminate = someSelected
+  }, [someSelected])
+
+  const toggleAll = () => {
+    if (allSelected) clearSelection()
+    else selectAll(visibleIds)
+  }
+
   return (
     <div className="w-full overflow-auto border border-border rounded-xl bg-surface shadow-card">
       <table className="w-full text-sm">
         <thead className="bg-subtle border-b border-border">
           <tr className="text-left text-[10px] uppercase tracking-[0.2em] text-muted font-semibold">
-            {selectable && <th className="px-4 py-3 w-10"></th>}
+            {selectable && (
+              <th className="px-4 py-3 w-10">
+                <input
+                  ref={headerRef}
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleAll}
+                  aria-label="Select all prospects"
+                  className="accent-accent-green w-4 h-4 rounded"
+                />
+              </th>
+            )}
             <th className="px-4 py-3">Name</th>
             <th className="px-4 py-3">Title</th>
             <th className="px-4 py-3">Company</th>

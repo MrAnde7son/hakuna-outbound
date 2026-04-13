@@ -84,7 +84,7 @@ async def list_campaigns():
             r = await client.get(f"{BASE}/campaigns", headers=_auth_headers())
             if r.status_code >= 400:
                 log.warning("lemlist campaigns %s: %s", r.status_code, r.text[:200])
-                return _mock_campaigns()
+                return []
             data = r.json()
             if isinstance(data, list):
                 return [{
@@ -93,21 +93,39 @@ async def list_campaigns():
                     "status": c.get("status", "active"),
                     "stats": c.get("stats", {"sent": 0, "openRate": 0, "replyRate": 0, "booked": 0}),
                 } for c in data]
-            return _mock_campaigns()
+            return []
     except Exception as e:
         log.exception("lemlist campaigns failed: %s", e)
-        return _mock_campaigns()
+        return []
 
 
-async def enroll_lead(campaign_id: str, email: str, first_name: str = "", last_name: str = "", company: str = ""):
+async def enroll_lead(
+    campaign_id: str,
+    email: str,
+    first_name: str = "",
+    last_name: str = "",
+    company: str = "",
+    custom: dict | None = None,
+):
+    """Enroll a lead into a Lemlist campaign.
+
+    `custom` is merged into the payload so sequence copy can reference
+    variables like {{icpReason}}, {{techStack}}, {{jobTitle}}.
+    """
+    payload: dict = {"firstName": first_name, "lastName": last_name, "companyName": company}
+    for k, v in (custom or {}).items():
+        if v is None or v == "":
+            continue
+        payload[k] = v if isinstance(v, (str, int, float, bool)) else str(v)
+
     if not os.getenv("LEMLIST_API_KEY"):
-        return {"ok": True, "mock": True, "email": email, "campaign_id": campaign_id}
+        return {"ok": True, "mock": True, "email": email, "campaign_id": campaign_id, "payload": payload}
     try:
         async with httpx.AsyncClient(timeout=20) as client:
             r = await client.post(
                 f"{BASE}/campaigns/{campaign_id}/leads/{email}",
                 headers=_auth_headers(),
-                json={"firstName": first_name, "lastName": last_name, "companyName": company},
+                json=payload,
             )
             return {"ok": r.status_code < 400, "status": r.status_code, "email": email}
     except Exception as e:
@@ -123,19 +141,22 @@ async def recent_activity():
             out = []
             for c in campaigns[:4]:
                 r = await client.get(f"{BASE}/campaigns/{c['id']}/activities", headers=_auth_headers())
-                if r.status_code < 400:
-                    for a in (r.json() or [])[:20]:
-                        out.append({
-                            "id": a.get("_id", ""),
-                            "type": a.get("type", "open"),
-                            "prospect": a.get("leadFirstName", "") + " " + a.get("leadLastName", ""),
-                            "company": a.get("leadCompanyName", ""),
-                            "campaign": c["name"],
-                            "timestamp": a.get("createdAt", ""),
-                            "title": f"{a.get('leadFirstName','Lead')} {a.get('type','activity')}",
-                            "subtext": c["name"],
-                        })
+                if r.status_code >= 400:
+                    log.warning("lemlist activities %s: %s", r.status_code, r.text[:200])
+                    continue
+                for a in (r.json() or [])[:20]:
+                    out.append({
+                        "id": a.get("_id", ""),
+                        "type": a.get("type", "open"),
+                        "prospect": a.get("leadFirstName", "") + " " + a.get("leadLastName", ""),
+                        "company": a.get("leadCompanyName", ""),
+                        "campaign": c["name"],
+                        "timestamp": a.get("createdAt", ""),
+                        "title": f"{a.get('leadFirstName','Lead')} {a.get('type','activity')}",
+                        "subtext": c["name"],
+                    })
             out.sort(key=lambda x: x["timestamp"], reverse=True)
-            return out or _mock_signals()
-    except Exception:
-        return _mock_signals()
+            return out
+    except Exception as e:
+        log.exception("lemlist activities failed: %s", e)
+        return []

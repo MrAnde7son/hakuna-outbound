@@ -39,33 +39,37 @@ When asked to "enroll", confirm the campaign and list the prospects.
 Be concise, punchy, and operator-focused. Use short paragraphs and bullet points."""
 
 
+def _heuristic_score(prospect: Dict[str, Any], titles: List[str],
+                     industry: str, tech_stack: str) -> Dict[str, Any]:
+    score = 60
+    org = prospect.get("organization", {}) or {}
+    title = (prospect.get("title") or "").lower()
+    if titles and any(t.lower() in title for t in titles):
+        score += 15
+    if industry and industry.lower() in (org.get("industry", "") or "").lower():
+        score += 8
+    if tech_stack:
+        techs = [t.strip().lower() for t in tech_stack.split(",")]
+        orgtech = (org.get("technologies", "") or "").lower()
+        if any(t in orgtech for t in techs):
+            score += 10
+    score += random.randint(-5, 8)
+    score = max(40, min(99, score))
+    if score >= 85:
+        reason = "Strong title + industry + tech match"
+    elif score >= 70:
+        reason = "Good title fit, partial tech/industry match"
+    else:
+        reason = "Weak ICP overlap"
+    return {"score": score, "reason": reason}
+
+
 async def score_prospect(prospect: Dict[str, Any], icp_description: str, titles: List[str],
                          company_size: str, industry: str, tech_stack: str) -> Dict[str, Any]:
     """Score a single prospect against ICP. Returns {score, reason}."""
     model = _init()
     if not model:
-        score = 60
-        org = prospect.get("organization", {}) or {}
-        title = (prospect.get("title") or "").lower()
-        if titles and any(t.lower() in title for t in titles):
-            score += 15
-        if industry and industry.lower() in (org.get("industry", "") or "").lower():
-            score += 8
-        if tech_stack:
-            techs = [t.strip().lower() for t in tech_stack.split(",")]
-            orgtech = (org.get("technologies", "") or "").lower()
-            if any(t in orgtech for t in techs):
-                score += 10
-        score += random.randint(-5, 8)
-        score = max(40, min(99, score))
-        reasons = []
-        if score >= 85:
-            reasons.append("Strong title + industry + tech match")
-        elif score >= 70:
-            reasons.append("Good title fit, partial tech/industry match")
-        else:
-            reasons.append("Weak ICP overlap")
-        return {"score": score, "reason": reasons[0]}
+        return _heuristic_score(prospect, titles, industry, tech_stack)
 
     try:
         prompt = f"""Score this prospect 0-100 against the ICP.
@@ -90,7 +94,7 @@ Return only JSON: {{"score": <int>, "reason": "<one sentence>"}}"""
         data = json.loads(text)
         return {"score": int(data.get("score", 60)), "reason": data.get("reason", "")}
     except Exception:
-        return {"score": 65, "reason": "Default scoring (model unavailable)"}
+        return _heuristic_score(prospect, titles, industry, tech_stack)
 
 
 async def agent_stream(messages: List[Dict[str, str]]) -> AsyncGenerator[str, None]:

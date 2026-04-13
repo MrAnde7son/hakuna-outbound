@@ -1,0 +1,17 @@
+project_id = "hakuna-prod-2026"
+region     = "us-central1"
+
+# Vertex AI region/model used by backend Gemini calls.
+vertex_location = "us-central1"
+vertex_model    = "gemini-2.5-flash"
+
+# Comma-separated origins allowed by the FastAPI CORS middleware. After the
+# first apply, fill this in with the frontend URL from `terraform output`.
+cors_origins = "https://hakuna-outbound-frontend-xxxxxxxx-uc.a.run.app"
+
+# Secrets — DO NOT commit. Pull from a password manager.
+apollo_api_key  = "REPLACE_ME"
+lemlist_api_key = "REPLACE_ME"
+
+# GitHub repo authorized to mint deploy tokens via WIF.
+github_repo = "MrAnde7son/hakuna-outbound"

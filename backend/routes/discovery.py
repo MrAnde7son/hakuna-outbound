@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 from database import get_session
 from models import Prospect
-from services.apollo import search_people
+from services.apollo import search_people, enrich_person
 from services.vertex import score_prospect
 
 router = APIRouter(prefix="/api/discovery", tags=["discovery"])
@@ -15,20 +15,29 @@ router = APIRouter(prefix="/api/discovery", tags=["discovery"])
 class DiscoveryRequest(BaseModel):
     icp_description: str = ""
     titles: List[str] = []
-    company_size: Optional[str] = None
-    industry: Optional[str] = None
-    tech_stack: Optional[str] = None
+    seniorities: List[str] = []
+    company_size: Optional[str] = None  # comma-separated or single range
+    industry: Optional[str] = None      # comma-separated or single value
+    tech_stack: Optional[str] = None    # comma-separated uids
+    locations: List[str] = []
     min_score: int = 70
+    page: int = 1
+    per_page: int = 25
+    enrich: bool = True  # unlock emails via people/match for scored prospects
 
 
 @router.post("/run")
 async def run_discovery(req: DiscoveryRequest, session: Session = Depends(get_session)):
     people = await search_people(
         titles=req.titles,
+        seniorities=req.seniorities,
         company_size=req.company_size,
         industry=req.industry,
         tech_stack=req.tech_stack,
+        locations=req.locations,
         keywords=req.icp_description,
+        page=req.page,
+        per_page=req.per_page,
     )
 
     async def score(p):
@@ -39,11 +48,14 @@ async def run_discovery(req: DiscoveryRequest, session: Session = Depends(get_se
         return p, result
 
     scored = await asyncio.gather(*(score(p) for p in people))
+    qualified = [(p, s) for p, s in scored if s["score"] >= req.min_score]
+
+    if req.enrich and qualified:
+        enriched = await asyncio.gather(*(enrich_person(p) for p, _ in qualified))
+        qualified = list(zip(enriched, (s for _, s in qualified)))
 
     out = []
-    for p, s in scored:
-        if s["score"] < req.min_score:
-            continue
+    for p, s in qualified:
         org = p.get("organization") or {}
         out.append({
             "apollo_id": p.get("id"),

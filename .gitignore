@@ -7,3 +7,12 @@ frontend/node_modules/
 frontend/dist/
 frontend/.env
 .DS_Store
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.*
+terraform/terraform.tfvars
+terraform/tfplan
+terraform/*.auto.tfvars
