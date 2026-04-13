@@ -182,3 +182,29 @@ resource "google_cloud_run_v2_service_iam_member" "frontend_public" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+# Bind the public hostname to the frontend service. The Cloudflare CNAME to
+# ghs.googlehosted.com only works once Google has a mapping that says "this
+# FQDN belongs to this service" — without this resource, ghs returns 404.
+#
+# google_cloud_run_domain_mapping is the v1 (Knative) API. It still accepts
+# v2 services by name and is supported in us-central1. Not available in all
+# regions — if var.region is switched to one without domain-mapping support
+# (e.g. most europe-* regions), swap this for an external HTTPS LB + NEG.
+resource "google_cloud_run_domain_mapping" "frontend" {
+  name     = var.hostname
+  location = var.region
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.frontend.name
+  }
+
+  depends_on = [
+    google_cloud_run_v2_service.frontend,
+    google_project_service.apis,
+  ]
+}
