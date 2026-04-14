@@ -19,27 +19,27 @@ export default function Dashboard() {
   const totalBooked = c.reduce((a, x) => a + (x.stats?.booked || 0), 0)
 
   return (
-    <div className="p-8 space-y-8 max-w-[1400px] mx-auto">
-      <div className="flex items-end justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-[1400px] mx-auto">
+      <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold text-ink">Dashboard</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink">Dashboard</h1>
           <p className="text-muted text-sm mt-1">Live operator view of your outbound motion.</p>
         </div>
-        <div className="text-xs text-muted flex items-center gap-2 font-mono">
+        <div className="text-xs text-muted flex items-center gap-2 font-mono shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
           Live
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard label="Prospects in pipeline" value={p.length} delta="+ today" />
         <StatCard label="Emails sent" value={totalSent.toLocaleString()} tone="blue" delta="7-day rolling" />
         <StatCard label="Open rate" value={`${avgOpen}%`} tone="blue" delta="across active sequences" />
         <StatCard label="Replies / booked" value={`${totalReplies} / ${totalBooked}`} delta="this cycle" />
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <section className="col-span-2 space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="lg:col-span-2 space-y-3">
           <SectionTitle>Signal feed</SectionTitle>
           <SignalFeed signals={s} limit={4} />
         </section>
@@ -51,7 +51,7 @@ export default function Dashboard() {
 
       <section className="space-y-3">
         <SectionTitle>Active campaigns</SectionTitle>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {c.filter(x => x.status === 'active').slice(0, 4).map((x) => (
             <CampaignCard key={x.id} campaign={x} />
           ))}

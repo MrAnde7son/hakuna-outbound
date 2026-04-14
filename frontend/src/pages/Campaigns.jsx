@@ -9,13 +9,13 @@ export default function Campaigns() {
   })
 
   return (
-    <div className="p-8 space-y-6 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto">
       <div>
-        <h1 className="font-display text-3xl font-bold text-ink">Campaigns</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink">Campaigns</h1>
         <p className="text-muted text-sm mt-1">Your Lemlist sequences — live stats and controls.</p>
       </div>
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="bg-surface border border-border rounded-xl p-5 shadow-card animate-pulse h-40" />
           ))}
@@ -31,7 +31,7 @@ export default function Campaigns() {
           <p className="text-muted text-sm mt-1">Create a sequence in Lemlist and it'll show up here.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {campaigns.map((c) => <CampaignCard key={c.id} campaign={c} />)}
         </div>
       )}

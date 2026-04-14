@@ -40,14 +40,14 @@ export default function Discovery() {
   })
 
   return (
-    <div className="p-8 space-y-8 max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-[1400px] mx-auto">
       <div>
-        <h1 className="font-display text-3xl font-bold text-ink">ICP Discovery</h1>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink">ICP Discovery</h1>
         <p className="text-muted text-sm mt-1">Describe your ideal customer. We'll pull matching prospects and score them with Vertex AI.</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 bg-surface border border-border rounded-xl p-6 space-y-4 shadow-card">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-surface border border-border rounded-xl p-4 sm:p-6 space-y-4 shadow-card">
           <Field label="ICP description (natural language)">
             <textarea
               value={form.icp_description}
@@ -56,7 +56,7 @@ export default function Discovery() {
               className="w-full bg-white border border-border rounded-md px-4 py-3 text-sm text-ink outline-none focus:border-accent-green focus:ring-2 focus:ring-accent-green-soft resize-none transition"
             />
           </Field>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Job titles (comma-separated)">
               <input value={form.titles} onChange={(e) => setForm({ ...form, titles: e.target.value })} className={inputCls} />
             </Field>
@@ -82,7 +82,7 @@ export default function Discovery() {
               className="w-full accent-accent-green"
             />
           </Field>
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               onClick={() => run.mutate()}
               disabled={run.isPending}
@@ -107,7 +107,7 @@ export default function Discovery() {
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-accent-green-soft to-accent-blue-soft border border-border rounded-xl p-6 shadow-card">
+        <div className="bg-gradient-to-br from-accent-green-soft to-accent-blue-soft border border-border rounded-xl p-4 sm:p-6 shadow-card">
           <div className="text-[10px] uppercase tracking-[0.22em] text-slate-700 font-semibold">How it works</div>
           <ol className="mt-3 space-y-3 text-sm text-slate-700">
             <li className="flex gap-2"><span className="flex-none w-5 h-5 rounded-full bg-accent-green text-white text-[11px] font-bold flex items-center justify-center">1</span><span>Apollo People Search pulls real candidates.</span></li>

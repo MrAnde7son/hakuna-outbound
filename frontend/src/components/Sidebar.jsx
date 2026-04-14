@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 
 const NAV = [
@@ -10,9 +11,9 @@ const NAV = [
   { to: '/pipeline', label: 'Pipeline', icon: '▦' },
 ]
 
-export default function Sidebar() {
+function SidebarPanel({ onNavigate }) {
   return (
-    <aside className="w-64 shrink-0 border-r border-border bg-surface flex flex-col">
+    <div className="h-full w-64 border-r border-border bg-surface flex flex-col">
       <div className="px-6 py-6 border-b border-border">
         <div className="flex items-center gap-2.5">
           <div className="relative">
@@ -23,11 +24,12 @@ export default function Sidebar() {
         </div>
         <p className="text-[10px] uppercase tracking-[0.22em] text-muted mt-2 font-medium">Outbound OS</p>
       </div>
-      <nav className="flex-1 px-3 py-5 space-y-0.5">
+      <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
         {NAV.map((n) => (
           <NavLink
             key={n.to}
             to={n.to}
+            onClick={onNavigate}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-all ${
                 isActive
@@ -45,6 +47,47 @@ export default function Sidebar() {
         <div className="text-[10px] uppercase tracking-[0.2em] text-muted font-medium">Operator</div>
         <div className="text-sm mt-1 text-ink">workspace · <span className="text-muted">beta</span></div>
       </div>
-    </aside>
+    </div>
+  )
+}
+
+export default function Sidebar({ isOpen = false, onClose }) {
+  // Close drawer on Escape (mobile)
+  useEffect(() => {
+    if (!isOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isOpen, onClose])
+
+  return (
+    <>
+      {/* Desktop sidebar — unchanged behavior */}
+      <aside className="hidden md:flex shrink-0">
+        <SidebarPanel />
+      </aside>
+
+      {/* Mobile drawer */}
+      <div
+        className={`md:hidden fixed inset-0 z-50 ${isOpen ? '' : 'pointer-events-none'}`}
+        aria-hidden={!isOpen}
+      >
+        {/* Backdrop */}
+        <div
+          onClick={onClose}
+          className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity ${
+            isOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+        {/* Panel */}
+        <aside
+          className={`absolute inset-y-0 left-0 shadow-pop transition-transform duration-200 ease-out ${
+            isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <SidebarPanel onNavigate={onClose} />
+        </aside>
+      </div>
+    </>
   )
 }
