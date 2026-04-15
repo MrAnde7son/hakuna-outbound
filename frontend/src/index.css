@@ -2,39 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Global resets, scrollbar, font stacks (Inter/Syne/DM Mono), and the
+ * pulse-dot / fill-bar / progress-stripe keyframes are provided by
+ * @hakunahq/ui/tokens/base.css, which is imported in main.jsx.
+ *
+ * Only app-specific overrides belong here.
+ */
+
 :root {
   color-scheme: light;
 }
 
-html, body, #root { height: 100%; }
+/* Legacy utility classes referenced in-app. Prefer @hakunahq/ui utilities
+   (.hk-font-display, .hk-font-mono, .hk-grid-bg) in new code. */
+.font-display { font-family: var(--hk-font-display); letter-spacing: -0.02em; }
+.font-mono    { font-family: var(--hk-font-mono); }
 
-body {
-  background: #f5f7fa;
-  color: #0f172a;
-  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-.font-display { font-family: "Syne", sans-serif; letter-spacing: -0.02em; }
-.font-mono { font-family: "DM Mono", ui-monospace, monospace; }
-
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d7e0; border-radius: 6px; border: 2px solid #f5f7fa; }
-::-webkit-scrollbar-thumb:hover { background: #aab3c2; }
-
-@keyframes pulse-dot {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1); }
-}
-.dot-anim { animation: pulse-dot 1.2s infinite ease-in-out; }
-
-@keyframes fill-bar {
-  from { width: 0%; }
-}
-.animate-fill { animation: fill-bar 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
-
+.dot-anim         { animation: hk-pulse-dot 1.2s infinite ease-in-out; }
+.animate-fill    { animation: hk-fill-bar 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
 @keyframes progress-stripe {
   0% { background-position: 0 0; }
   100% { background-position: 40px 0; }

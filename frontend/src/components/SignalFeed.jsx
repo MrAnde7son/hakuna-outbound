@@ -1,8 +1,10 @@
+import { Button } from '@hakunahq/ui'
+
 const ICONS = {
-  open: { glyph: '◉', color: 'text-accent-blue', bg: 'bg-accent-blue-soft' },
-  click: { glyph: '↗', color: 'text-accent-blue', bg: 'bg-accent-blue-soft' },
-  reply: { glyph: '✎', color: 'text-accent-green', bg: 'bg-accent-green-soft' },
-  booked: { glyph: '★', color: 'text-amber-600', bg: 'bg-amber-50' },
+  open:   { glyph: '◉', fg: 'var(--hk-primary)', bg: 'var(--hk-primary-50)' },
+  click:  { glyph: '↗', fg: 'var(--hk-primary)', bg: 'var(--hk-primary-50)' },
+  reply:  { glyph: '✎', fg: 'var(--hk-success)', bg: 'var(--hk-success-subtle)' },
+  booked: { glyph: '★', fg: 'var(--hk-warning)', bg: 'var(--hk-warning-subtle)' },
 }
 
 function timeAgo(ts) {
@@ -16,34 +18,50 @@ function timeAgo(ts) {
 
 export default function SignalFeed({ signals, onRespond, limit }) {
   const rows = limit ? signals.slice(0, limit) : signals
+
   return (
-    <div className="border border-border rounded-xl divide-y divide-border bg-surface shadow-card overflow-hidden">
-      {rows.map((s) => {
+    <div
+      className="rounded-md overflow-hidden"
+      style={{
+        background: 'var(--hk-card)',
+        border: '1px solid var(--hk-border)',
+        boxShadow: 'var(--hk-shadow-sm)',
+      }}
+    >
+      {rows.map((s, idx) => {
         const ic = ICONS[s.type] || ICONS.open
         const showCTA = s.type === 'reply' || s.type === 'booked'
         return (
-          <div key={s.id} className="flex items-start sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 hover:bg-subtle/60 transition-colors">
-            <div className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${ic.bg} ${ic.color}`}>
+          <div
+            key={s.id}
+            className="flex items-start sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 transition-colors"
+            style={{ borderTop: idx > 0 ? '1px solid var(--hk-border)' : 'none' }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--hk-bg-muted)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <div
+              className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center"
+              style={{ background: ic.bg, color: ic.fg }}
+            >
               <span className="text-sm">{ic.glyph}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm text-ink">{s.title}</div>
+              <div className="text-sm">{s.title}</div>
               <div className="text-xs text-muted truncate">{s.subtext} · {s.campaign}</div>
               <div className="text-xs text-muted font-mono sm:hidden mt-1">{timeAgo(s.timestamp)}</div>
             </div>
-            <div className="text-xs text-muted whitespace-nowrap font-mono hidden sm:block">{timeAgo(s.timestamp)}</div>
+            <div className="text-xs text-muted whitespace-nowrap font-mono hidden sm:block">
+              {timeAgo(s.timestamp)}
+            </div>
             {showCTA && (
-              <button
-                onClick={() => onRespond?.(s)}
-                className="text-xs font-medium px-3 py-1.5 border border-emerald-200 bg-accent-green-soft text-accent-green rounded-md hover:bg-emerald-100 hover:border-emerald-300 transition shrink-0"
-              >
-                Respond
-              </button>
+              <Button size="sm" variant="success" onClick={() => onRespond?.(s)}>Respond</Button>
             )}
           </div>
         )
       })}
-      {rows.length === 0 && <div className="px-5 py-12 text-center text-muted text-sm">No signals yet.</div>}
+      {rows.length === 0 && (
+        <div className="px-5 py-12 text-center text-muted text-sm">No signals yet.</div>
+      )}
     </div>
   )
 }

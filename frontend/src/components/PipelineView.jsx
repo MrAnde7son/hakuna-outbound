@@ -1,5 +1,14 @@
+import { Card, Avatar, StatCard, ResponsiveGrid } from '@hakunahq/ui'
+
 const STAGES = ['Matched', 'Contacted', 'Opened', 'Replied', 'Booked', 'Closed']
-const STAGE_COLOR = ['bg-slate-300', 'bg-accent-blue', 'bg-accent-blue', 'bg-accent-green', 'bg-accent-green', 'bg-purple-500']
+const STAGE_COLOR = [
+  'var(--hk-neutral-300)',
+  'var(--hk-primary)',
+  'var(--hk-primary)',
+  'var(--hk-success)',
+  'var(--hk-success)',
+  'var(--hk-purple)',
+]
 
 function prospectStage(p) {
   if (p.status === 'qualified') return 5
@@ -14,47 +23,41 @@ export default function PipelineView({ prospects }) {
 
   return (
     <div className="space-y-6 lg:space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <ResponsiveGrid min={160} gap={12}>
         {STAGES.map((s, i) => (
-          <div key={s} className="bg-surface border border-border rounded-xl p-4 shadow-card">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted font-semibold">{s}</div>
-            <div className="font-display text-2xl sm:text-3xl font-bold mt-2 text-ink">{counts[i]}</div>
-            <div className={`h-1 mt-3 rounded-full ${STAGE_COLOR[i]}`} />
-          </div>
+          <StatCard key={s} label={s} value={counts[i]} color={STAGE_COLOR[i]} />
         ))}
-      </div>
+      </ResponsiveGrid>
 
-      <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 shadow-card">
-        <div className="font-display text-lg font-semibold mb-5 text-ink">Prospect journeys</div>
+      <Card style={{ padding: 24 }}>
+        <div className="font-display text-lg font-semibold mb-5">Prospect journeys</div>
         <div className="space-y-5">
           {prospects.slice(0, 12).map((p) => {
             const current = prospectStage(p)
-            const initials = `${p.first_name?.[0] || ''}${p.last_name?.[0] || ''}`
+            const name = `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Unknown'
             return (
-              <div key={p.id || p.apollo_id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <div
+                key={p.id || p.apollo_id}
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
+              >
                 <div className="flex items-center gap-3 sm:gap-4 sm:w-auto">
-                  <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-accent-blue to-accent-green flex items-center justify-center text-xs font-bold text-white shadow-sm">
-                    {initials}
-                  </div>
+                  <Avatar name={name} size={36} />
                   <div className="min-w-0 sm:w-56 sm:min-w-[180px]">
-                    <div className="text-sm font-medium text-ink truncate">{p.first_name} {p.last_name}</div>
+                    <div className="text-sm font-medium truncate">{name}</div>
                     <div className="text-xs text-muted truncate">{p.company}</div>
                   </div>
                 </div>
                 <div className="flex-1 flex items-center overflow-x-auto sm:overflow-visible pl-[3.25rem] sm:pl-0 -mt-2 sm:mt-0">
                   {STAGES.map((_, i) => (
                     <div key={i} className="flex items-center flex-1 last:flex-none min-w-[28px]">
-                      <div
-                        className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[10px] border-2 font-semibold ${
-                          i < current ? 'bg-accent-green border-accent-green text-white' :
-                          i === current ? 'border-accent-green text-accent-green bg-accent-green-soft animate-pulse' :
-                          'border-slate-200 text-muted bg-white'
-                        }`}
-                      >
-                        {i < current ? '✓' : i + 1}
-                      </div>
+                      <StageDot done={i < current} current={i === current} index={i} />
                       {i < STAGES.length - 1 && (
-                        <div className={`h-px flex-1 min-w-[12px] ${i < current ? 'bg-accent-green' : 'bg-slate-200'}`} />
+                        <div
+                          className="h-px flex-1 min-w-[12px]"
+                          style={{
+                            background: i < current ? 'var(--hk-success)' : 'var(--hk-border)',
+                          }}
+                        />
                       )}
                     </div>
                   ))}
@@ -66,7 +69,23 @@ export default function PipelineView({ prospects }) {
             <div className="text-muted text-sm text-center py-10">No prospects in pipeline yet.</div>
           )}
         </div>
-      </div>
+      </Card>
+    </div>
+  )
+}
+
+function StageDot({ done, current, index }) {
+  return (
+    <div
+      className="w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[10px] font-semibold"
+      style={{
+        background: done ? 'var(--hk-success)' : current ? 'var(--hk-success-subtle)' : 'var(--hk-card)',
+        border: `2px solid ${done || current ? 'var(--hk-success)' : 'var(--hk-border)'}`,
+        color: done ? 'var(--hk-on-bright)' : current ? 'var(--hk-success)' : 'var(--hk-text-muted)',
+        animation: current ? 'hk-pulse-dot 1.6s ease-in-out infinite' : undefined,
+      }}
+    >
+      {done ? '✓' : index + 1}
     </div>
   )
 }

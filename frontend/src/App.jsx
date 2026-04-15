@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import Sidebar from './components/Sidebar.jsx'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { NavBar, MobileTopBar, LogoWordmark, LogoSymbol, useBreakpoint } from '@hakunahq/ui'
 import Dashboard from './pages/Dashboard.jsx'
 import Discovery from './pages/Discovery.jsx'
 import Prospects from './pages/Prospects.jsx'
@@ -9,15 +9,80 @@ import Signals from './pages/Signals.jsx'
 import Agent from './pages/Agent.jsx'
 import Pipeline from './pages/Pipeline.jsx'
 
+// Keys mirror the first path segment (`/dashboard`, `/discovery`, …)
+const NAV_ITEMS = [
+  { key: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: icon('▤') },
+  { key: 'discovery', label: 'ICP Discovery', path: '/discovery', icon: icon('⌕') },
+  { key: 'prospects', label: 'Prospects',  path: '/prospects', icon: icon('☲') },
+  { key: 'campaigns', label: 'Campaigns',  path: '/campaigns', icon: icon('✦') },
+  { key: 'signals',   label: 'Signals',    path: '/signals',   icon: icon('∿') },
+  { key: 'agent',     label: 'AI Agent',   path: '/agent',     icon: icon('◈') },
+  { key: 'pipeline',  label: 'Pipeline',   path: '/pipeline',  icon: icon('▦') },
+]
+
+const ROUTE_TITLES = Object.fromEntries(NAV_ITEMS.map(i => [i.path, i.label]))
+
+// The DS NavBar expects an `icon` ComponentType. We wrap unicode glyphs so
+// we don't have to pull in lucide-react just for the sidebar.
+function icon(glyph) {
+  return function GlyphIcon({ size = 18, color }) {
+    return (
+      <span
+        aria-hidden="true"
+        style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: size, height: size, fontSize: size - 2, lineHeight: 1,
+          color: color || 'currentColor', opacity: 0.85,
+        }}
+      >
+        {glyph}
+      </span>
+    )
+  }
+}
+
 export default function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const bp = useBreakpoint()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  const activeKey = NAV_ITEMS.find(i => pathname.startsWith(i.path))?.key
+  const title = ROUTE_TITLES[pathname] || 'Hakuna'
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-bg">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <MobileTopBar onMenu={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      {!bp.md && (
+        <MobileTopBar
+          logo={<LogoWordmark size={20} />}
+          onMenuClick={() => setMobileOpen(true)}
+          actions={<span className="text-xs text-muted font-mono">{title}</span>}
+        />
+      )}
+      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        <NavBar
+          items={NAV_ITEMS}
+          activeKey={activeKey}
+          onNavigate={(item) => navigate(item.path)}
+          logo={<LogoWordmark size={22} />}
+          logoCollapsed={<LogoSymbol size={20} />}
+          subtitle="Outbound OS"
+          mobileOpen={mobileOpen}
+          onMobileOpenChange={setMobileOpen}
+          footer={
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted font-semibold">Operator</div>
+              <div className="text-xs mt-1">workspace · <span className="text-muted">beta</span></div>
+            </div>
+          }
+        />
+        <main
+          style={{
+            flex: 1, minWidth: 0, overflowY: 'auto',
+            marginLeft: bp.md ? 220 : 0,
+            background: 'var(--hk-bg)',
+          }}
+        >
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -31,42 +96,5 @@ export default function App() {
         </main>
       </div>
     </div>
-  )
-}
-
-const ROUTE_TITLES = {
-  '/dashboard': 'Dashboard',
-  '/discovery': 'ICP Discovery',
-  '/prospects': 'Prospects',
-  '/campaigns': 'Campaigns',
-  '/signals': 'Signals',
-  '/agent': 'AI Agent',
-  '/pipeline': 'Pipeline',
-}
-
-function MobileTopBar({ onMenu }) {
-  const { pathname } = useLocation()
-  const title = ROUTE_TITLES[pathname] || 'Hakuna'
-  return (
-    <header className="md:hidden flex items-center gap-3 px-4 h-14 border-b border-border bg-surface shrink-0">
-      <button
-        onClick={onMenu}
-        aria-label="Open menu"
-        className="w-9 h-9 flex flex-col items-center justify-center gap-[4px] rounded-md border border-border hover:bg-subtle transition"
-      >
-        <span className="w-4 h-[2px] bg-ink rounded-full" />
-        <span className="w-4 h-[2px] bg-ink rounded-full" />
-        <span className="w-4 h-[2px] bg-ink rounded-full" />
-      </button>
-      <div className="flex items-center gap-2">
-        <div className="relative">
-          <div className="w-2 h-2 rounded-full bg-accent-green" />
-          <div className="absolute inset-0 w-2 h-2 rounded-full bg-accent-green animate-ping opacity-60" />
-        </div>
-        <div className="font-display text-base font-bold tracking-tight text-ink">Hakuna</div>
-        <span className="text-muted text-sm">·</span>
-        <div className="text-sm text-slate-600">{title}</div>
-      </div>
-    </header>
   )
 }
